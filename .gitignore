@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data & models (do not commit)
+data/raw/
+models/
+
+# OS files
+.DS_Store
+Thumbs.db
