@@ -15,3 +15,6 @@ models/
 # OS files
 .DS_Store
 Thumbs.db
+
+#Data
+data/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
