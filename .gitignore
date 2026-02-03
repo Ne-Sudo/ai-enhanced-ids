@@ -18,3 +18,6 @@ Thumbs.db
 
 #Data
 data/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+
+#log
+/logs
