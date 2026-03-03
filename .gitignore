@@ -10,7 +10,8 @@ __pycache__/
 
 # Data & models (do not commit)
 data/raw/
-models/
+models/IDS_RF_v0.1
+models/IDS_RF_v0.2
 
 # OS files
 .DS_Store
