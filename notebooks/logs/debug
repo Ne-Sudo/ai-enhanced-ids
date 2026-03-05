@@ -1,0 +1,33 @@
+2026-03-05 15:53:45 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.UnsatisfiedLinkError: 'long com.slytechs.library.NativeLibrary.dlopen(java.lang.String)'
+2026-03-05 15:53:45 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.UnsatisfiedLinkError: 'long com.slytechs.library.NativeLibrary.dlopen(java.lang.String)'
+2026-03-05 15:54:16 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.NoClassDefFoundError: Could not initialize class org.jnetpcap.Pcap
+2026-03-05 15:54:16 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.NoClassDefFoundError: Could not initialize class org.jnetpcap.Pcap
+2026-03-05 15:54:16 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.NoClassDefFoundError: Could not initialize class org.jnetpcap.Pcap
+2026-03-05 15:54:16 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.NoClassDefFoundError: Could not initialize class org.jnetpcap.Pcap
+2026-03-05 15:57:27 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.UnsatisfiedLinkError: 'long com.slytechs.library.NativeLibrary.dlopen(java.lang.String)'
+2026-03-05 15:57:27 DEBUG cic.cs.unb.ca.flow.ui.FlowMonitorPane    java.lang.UnsatisfiedLinkError: 'long com.slytechs.library.NativeLibrary.dlopen(java.lang.String)'
+2026-03-05 16:00:50 INFO  cic.cs.unb.ca.ifm.Cmd    The pcap file or folder does not exist! -> -f
+2026-03-05 16:01:44 INFO  cic.cs.unb.ca.ifm.Cmd    The pcap file or folder does not exist! -> -f
+2026-03-05 16:03:53 DEBUG cic.cs.unb.ca.flow.ui.FlowOfflinePane    offline select input E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260304173608.pcapng
+2026-03-05 16:04:04 DEBUG cic.cs.unb.ca.flow.ui.FlowOfflinePane    offline select output E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows
+2026-03-05 16:06:19 DEBUG cic.cs.unb.ca.flow.ui.FlowOfflinePane    offline select input E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260305160448.pcap
+2026-03-05 16:06:24 DEBUG cic.cs.unb.ca.flow.ui.FlowOfflinePane    offline select output E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows
+2026-03-05 16:07:11 DEBUG cic.cs.unb.ca.flow.ui.FlowOfflinePane    offline select output E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows
+2026-03-05 16:07:14 DEBUG cic.cs.unb.ca.flow.ui.FlowOfflinePane    offline select output E:\Project Portfolio\Dissertation\Final-Year-IDS\live
+2026-03-05 16:07:49 INFO  cic.cs.unb.ca.ifm.Cmd    The pcap file or folder does not exist! -> -f
+2026-03-05 16:19:16 INFO  cic.cs.unb.ca.ifm.Cmd    The pcap file or folder does not exist! -> -f
+2026-03-05 16:23:34 INFO  cic.cs.unb.ca.ifm.Cmd    You select: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260305160448.pcap
+2026-03-05 16:23:34 INFO  cic.cs.unb.ca.ifm.Cmd    Out folder: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows\capture_00001_20260305160448.csv
+2026-03-05 16:23:34 INFO  cic.cs.unb.ca.ifm.Cmd    CICFlowMeter received 1 pcap file
+2026-03-05 16:24:47 INFO  cic.cs.unb.ca.ifm.Cmd    You select: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260305160448.pcap
+2026-03-05 16:24:47 INFO  cic.cs.unb.ca.ifm.Cmd    Out folder: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows
+2026-03-05 16:24:48 INFO  cic.cs.unb.ca.ifm.Cmd    CICFlowMeter received 1 pcap file
+2026-03-05 16:31:26 INFO  cic.cs.unb.ca.ifm.Cmd    You select: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260305160448.pcap
+2026-03-05 16:31:26 INFO  cic.cs.unb.ca.ifm.Cmd    Out folder: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows\capture_00001_20260305160448.csv
+2026-03-05 16:31:26 INFO  cic.cs.unb.ca.ifm.Cmd    CICFlowMeter received 1 pcap file
+2026-03-05 16:49:19 INFO  cic.cs.unb.ca.ifm.Cmd    You select: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260305160448.pcap
+2026-03-05 16:49:19 INFO  cic.cs.unb.ca.ifm.Cmd    Out folder: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows\capture_00001_20260305160448.csv
+2026-03-05 16:49:19 INFO  cic.cs.unb.ca.ifm.Cmd    CICFlowMeter received 1 pcap file
+2026-03-05 17:01:19 INFO  cic.cs.unb.ca.ifm.Cmd    You select: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\pcaps\capture_00001_20260305165920.pcap
+2026-03-05 17:01:19 INFO  cic.cs.unb.ca.ifm.Cmd    Out folder: E:\Project Portfolio\Dissertation\Final-Year-IDS\live\flows\capture_00001_20260305165920.csv
+2026-03-05 17:01:19 INFO  cic.cs.unb.ca.ifm.Cmd    CICFlowMeter received 1 pcap file
