@@ -7,6 +7,7 @@ project_root = Path(r"E:\Project Portfolio\Dissertation\Final-Year-IDS")
 pcap_dir = project_root/"live"/"pcaps"
 flow_dir =  project_root/"live"/"flows"
 alert_dir = project_root/"live"/"alerts"
+alert_log = alert_dir / "alerts_log.csv"
 log_dir = project_root/"logs"
 model_dir = project_root/"models"
 
