@@ -21,7 +21,7 @@ def pcap_csv_conversion(pcap_path: Path, flow_dir, cicflow_bat: Path) -> Path:
     ]
 
     completed = subprocess.run(
-        cmd, cicflow_bat.parent, capture_output=True, text=True
+        cmd, cwd=cicflow_bat.parent, capture_output=True, text=True
     )
 
     if completed.returncode != 0:
@@ -39,10 +39,42 @@ def pcap_csv_conversion(pcap_path: Path, flow_dir, cicflow_bat: Path) -> Path:
 def find_csv(pcap_path: Path, flow_dir: Path) -> Path:
     matches = sorted(
         flow_dir.glob(f"{pcap_path.stem}*.csv"),
-        key=lambda p: p.stat().st_mtime, reverse=True
+        key=lambda p: p.stat().st_mtime,
+        reverse=True
     )
-    
+
     if not matches:
         raise FileNotFoundError(f"No CSV found for {pcap_path.stem}")
-    
-    return matches[0]
+
+    csv_path = matches[0]
+
+    if not wait_for_csv(csv_path, timeout=10.0, check_interval=0.5):
+        raise TimeoutError(f"CSV was created but is still locked: {csv_path}")
+
+    return csv_path
+
+# Checks that the CSV exists is old enough and can be opened
+def csv_ready(csv_path: Path, min_age: float = 1.0) -> bool:
+    if not csv_path.exists():
+        return False
+
+    # Check age
+    if (time.time() - csv_path.stat().st_mtime) < min_age:
+        return False
+
+    # Check if file is still locked
+    try:
+        with open(csv_path, "r", encoding="utf-8", errors="ignore"):
+            return True
+    except PermissionError:
+        return False
+
+def wait_for_csv(csv_path: Path, timeout: float = 10.0, check_interval: float = 0.5) -> bool:
+    start = time.time()
+
+    while time.time() - start < timeout:
+        if csv_ready(csv_path):
+            return True
+        time.sleep(check_interval)
+
+    return False
