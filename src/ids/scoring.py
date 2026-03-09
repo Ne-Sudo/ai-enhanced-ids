@@ -1,14 +1,14 @@
 import joblib
 import pandas as pd
+from pathlib import Path  # FIX: missing import
 
-from pathlib import Path
 from .preprocessing import clean_columns, extract_metadata, normalise_features
 
-#Load the model bundle as a dictionary
+
 def load_bundle(model_path: Path) -> dict:
     return joblib.load(model_path)
 
-#Define metrics for each severity level and return as a string (used in alerts)
+
 def severity_level(probability: float, threshold: float):
     if probability > 0.80:
         return "CRITICAL"
@@ -18,9 +18,10 @@ def severity_level(probability: float, threshold: float):
         return "MEDIUM"
     elif probability > threshold:
         return "LOW"
+
     return "SAFE"
 
-#Define alert stucture
+
 def build_alert(row: pd.Series, probability: float):
     return (
         f"⚠ Potential malicious flow detected | "
@@ -30,7 +31,7 @@ def build_alert(row: pd.Series, probability: float):
         f"Probability: {probability:.3f}"
     )
 
-# Function to score a csv using the trained model and return the results
+
 def score_csv(flow_csv: Path, model, train_features: list[str], threshold: float) -> pd.DataFrame:
     df = pd.read_csv(flow_csv)
     df = clean_columns(df)
@@ -39,8 +40,12 @@ def score_csv(flow_csv: Path, model, train_features: list[str], threshold: float
 
     if list(X.columns) != list(train_features):
         raise ValueError("Feature mismatch after normalisation")
-    
-    probabilities = model.predict_proba(X)[:,1]
+
+    if X.empty:
+        raise ValueError(f"No usable flow rows found in {flow_csv}")
+
+    probabilities = model.predict_proba(X)[:, 1]
+
     predictions = (probabilities >= threshold).astype(int)
 
     results = metadata.copy()
@@ -49,11 +54,14 @@ def score_csv(flow_csv: Path, model, train_features: list[str], threshold: float
     results["severity"] = [severity_level(p, threshold) for p in probabilities]
 
     alerts = []
+
     for i, row in results.iterrows():
+
         if results.loc[i, "prediction"] == 1:
             alerts.append(build_alert(row, results.loc[i, "malicious_prob"]))
         else:
             alerts.append("")
 
     results["alert"] = alerts
+
     return results
