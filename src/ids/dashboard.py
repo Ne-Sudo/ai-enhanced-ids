@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 import pandas as pd
 import time
 
-from src.ids.config import alert_log
+from src.ids.config import alert_log, alert_dir
 
 
 st.set_page_config(
@@ -224,9 +224,11 @@ if alert_log.exists():
                 color=attrs.get("color", "gray")
             )
 
-        net.save_graph("attack_map.html")
+        #FIX: defined the attack map path
+        attack_map_path = alert_dir / "attack_map.html"
+        net.save_graph(str(attack_map_path))
 
-        with open("attack_map.html", "r", encoding="utf-8") as f:
+        with open(attack_map_path, "r", encoding="utf-8") as f:
             html = f.read()
 
         components.html(html, height=500)
