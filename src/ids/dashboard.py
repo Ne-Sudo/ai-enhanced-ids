@@ -1,4 +1,6 @@
 import sys
+import networkx as nx
+from pyvis.network import Network
 from pathlib import Path
 
 # Ensure project root is in path so imports work
@@ -6,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(ROOT))
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import time
 
@@ -44,7 +47,6 @@ alerts = 0
 max_prob = 0
 
 if alert_log.exists():
-
     df = pd.read_csv(alert_log)
 
     flows = df["flows"].sum()
@@ -60,19 +62,72 @@ metric3.metric("Highest Threat Probability", f"{max_prob:.3f}")
 st.markdown("---")
 
 # ===============================
+# FLOW PROCESSING OVER TIME
+# ===============================
+
+st.subheader("Flow Processing Over Time")
+
+if alert_log.exists():
+
+    df["time"] = pd.to_datetime(df["time"])
+
+    flow_timeline = df.groupby(df["time"].dt.floor("min"))["flows"].sum()
+
+    st.line_chart(flow_timeline)
+
+else:
+
+    st.info("No traffic data yet")
+
+st.markdown("---")
+
+# ===============================
 # ALERT SEVERITY
 # ===============================
 
 st.subheader("Alert Severity Distribution")
 
 if alert_log.exists():
-
     severity_counts = df["severity"].value_counts()
-
     st.bar_chart(severity_counts)
 
 else:
     st.info("No alerts yet")
+
+st.markdown("---")
+
+# ===============================
+# ACTIVE THREAT PANEL
+# ===============================
+
+st.subheader("Active Threats")
+
+if alert_log.exists():
+
+    recent_alerts = df.sort_values("time", ascending=False).head(5)
+
+    for _, row in recent_alerts.iterrows():
+
+        severity = row["severity"]
+        src = row["src_ip"]
+        dst = row["dst_ip"]
+        prob = row["max_prob"]
+
+        if severity == "CRITICAL":
+            st.error(f"CRITICAL: {src} → {dst} | Probability {prob:.3f}")
+
+        elif severity == "HIGH":
+            st.warning(f"HIGH: {src} → {dst} | Probability {prob:.3f}")
+
+        elif severity == "MEDIUM":
+            st.info(f"MEDIUM: {src} → {dst} | Probability {prob:.3f}")
+
+        else:
+            st.success(f"LOW: {src} → {dst} | Probability {prob:.3f}")
+
+else:
+
+    st.info("No active threats detected")
 
 st.markdown("---")
 
@@ -83,9 +138,7 @@ st.markdown("---")
 st.subheader("Top Alerts")
 
 if alert_log.exists():
-
     top_alerts = df.sort_values("max_prob", ascending=False)
-
     st.dataframe(top_alerts.head(10))
 
 else:
@@ -94,13 +147,105 @@ else:
 st.markdown("---")
 
 # ===============================
+# NETWORK ATTACK MAP
+# ===============================
+
+st.subheader("Network Attack Map")
+
+if alert_log.exists():
+
+    alerts_df = pd.read_csv(alert_log)
+
+    if not alerts_df.empty:
+
+        # Only recent alerts for clarity
+        alerts_df = alerts_df.sort_values("time", ascending=False).head(30)
+
+        G = nx.DiGraph()
+
+        for _, row in alerts_df.iterrows():
+
+            src = str(row.get("src_ip", "unknown"))
+            dst = str(row.get("dst_ip", "unknown"))
+            severity = str(row.get("severity", "LOW"))
+            protocol = str(row.get("protocol", ""))
+
+            if src == "nan" or dst == "nan":
+                continue
+
+            # Internal network detection
+            internal_prefixes = ("10.", "192.168.", "172.")
+
+            src_internal = src.startswith(internal_prefixes)
+            dst_internal = dst.startswith(internal_prefixes)
+
+            # Node colours
+            src_color = "green" if src_internal else "red"
+            dst_color = "green" if dst_internal else "blue"
+
+            # Edge colour by severity
+            severity_colors = {
+                "CRITICAL": "red",
+                "HIGH": "orange",
+                "MEDIUM": "yellow",
+                "LOW": "gray"
+            }
+
+            edge_color = severity_colors.get(severity, "gray")
+
+            G.add_node(src, color=src_color)
+            G.add_node(dst, color=dst_color)
+
+            G.add_edge(
+                src,
+                dst,
+                title=f"{severity} | {protocol}",
+                color=edge_color
+            )
+
+        net = Network(height="500px", width="100%", directed=True)
+
+        for node, attrs in G.nodes(data=True):
+
+            node_id = str(node)
+
+            net.add_node(
+                node_id,
+                label=node_id,
+                color=attrs.get("color", "gray")
+            )
+
+        for src, dst, attrs in G.edges(data=True):
+
+            net.add_edge(
+                str(src),
+                str(dst),
+                title=attrs.get("title", ""),
+                color=attrs.get("color", "gray")
+            )
+
+        net.save_graph("attack_map.html")
+
+        with open("attack_map.html", "r", encoding="utf-8") as f:
+            html = f.read()
+
+        components.html(html, height=500)
+
+    else:
+
+        st.info("No attack relationships detected")
+
+else:
+
+    st.info("No alert data available")
+
+# ===============================
 # FULL LOG
 # ===============================
 
 st.subheader("Alert Log")
 
 if alert_log.exists():
-
     st.dataframe(df)
 
 else:
