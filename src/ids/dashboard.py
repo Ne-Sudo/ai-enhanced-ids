@@ -138,8 +138,8 @@ st.markdown("---")
 st.subheader("Top Alerts")
 
 if alert_log.exists():
-    top_alerts = df.sort_values("max_prob", ascending=False)
-    st.dataframe(top_alerts.head(10))
+    top_alerts_df = df.sort_values("max_prob", ascending=False)
+    st.dataframe(top_alerts_df.head(10))
 
 else:
     st.info("No alerts available")

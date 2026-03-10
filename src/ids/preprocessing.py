@@ -1,11 +1,13 @@
-#Renames live CICFlowmeter csv columns to match training names used for the model
+# preprocessing.py
+# Renames live CICFlowmeter csv columns to match training names used for the model
+
 import pandas as pd
 import numpy as np
 
-#Columns used for alerts not model input
-meta_cols = ["Flow ID","Src IP","Dst IP","Src Port","Dst Port","Protocol","Timestamp"]
+# Columns used for alerts, not model input
+meta_cols = ["Flow ID", "Src IP", "Dst IP", "Src Port", "Dst Port", "Protocol", "Timestamp"]
 
-#Rename live CICFlowmeter to match CICIDS training labels
+# Rename live CICFlowmeter columns to match CICIDS training labels
 rename_map = {
     "Flow Duration": "Flow Duration",
     "Tot Fwd Pkts": "Total Fwd Packets",
@@ -79,34 +81,41 @@ rename_map = {
     "Idle Min": "Idle Min",
 }
 
+
 def clean_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = df.columns.str.strip()
     return df
+
 
 def extract_metadata(df: pd.DataFrame) -> pd.DataFrame:
     present = [c for c in meta_cols if c in df.columns]
     return df[present].copy()
 
 
-#Convert CICFlowMeter dataframe into the exact features the trained model will expect
+# Convert a CICFlowMeter DataFrame into the exact feature matrix the trained model expects
 def normalise_features(df: pd.DataFrame, train_features: list[str]) -> pd.DataFrame:
-    
-    #clean and rename the columns of the live data using the rename map
+    """
+    ALTERNATIVE: wrap the RandomForest in a sklearn Pipeline with a
+    SimpleImputer(strategy='median') fitted on training data, then call
+    pipeline.predict_proba() directly.  This eliminates the separate
+    preprocessing step entirely and guarantees training/serving consistency.
+    """
     df = clean_columns(df)
     df = df.rename(columns=rename_map)
 
-    #Drop metadata from model input and label if present
     X = df.drop(columns=[c for c in meta_cols if c in df.columns], errors="ignore")
     X = X.drop(columns=["Label", "label"], errors="ignore")
 
-    #Handle inf and bad values
     X = X.replace(["Infinity", "inf", "-Infinity", "-inf", "INFINITY"], np.nan)
     X = X.apply(pd.to_numeric, errors="coerce")
     X = X.replace([np.inf, -np.inf], np.nan)
+
     X = X.fillna(X.median(numeric_only=True))
 
-    #Force feature order expected by the model
+    # Remaining NaN after median (e.g. all-NaN column) → zero to avoid model errors
+    X = X.fillna(0)
+
     X = X.reindex(columns=train_features, fill_value=0)
 
     return X.astype(np.float32)

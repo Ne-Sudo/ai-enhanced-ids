@@ -9,7 +9,11 @@ from .config import (
     rotate_time,
     poll_time,
     min_pcap_age,
-    top_alerts
+    top_alerts,
+    # IPS
+    ips_enabled,
+    block_log,
+    ip_whitelist,
 )
 
 from .capture import list_interfaces, start_capture, end_capture
@@ -22,9 +26,9 @@ def main():
     print(list_interfaces())
 
     bundle = load_bundle(model_path)
-    model = bundle["model"]
+    model          = bundle["model"]
     train_features = bundle["features"]
-    threshold = float(bundle["threshold"])
+    threshold      = float(bundle["threshold"])
 
     capture_proc = None
 
@@ -46,7 +50,11 @@ def main():
             threshold=threshold,
             poll_time=poll_time,
             min_pcap_age=min_pcap_age,
-            top_alerts=top_alerts
+            top_alerts=top_alerts,
+            # IPS
+            ips_enabled=ips_enabled,
+            block_log=block_log,
+            ip_whitelist=ip_whitelist,
         )
 
     finally:

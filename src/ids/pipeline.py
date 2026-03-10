@@ -4,6 +4,7 @@ from pathlib import Path
 from .flow_handler import pcap_age_check, pcap_csv_conversion, find_csv, wait_for_real_csv
 from .scoring import score_csv
 from .alerts import save_results, display_alerts, build_alert_summary, get_alert_log
+from .ips import run_ips
 
 
 def run_pipeline(
@@ -17,16 +18,22 @@ def run_pipeline(
     threshold: float,
     poll_time: float,
     min_pcap_age: float,
-    top_alerts: int
+    top_alerts: int,
+    # IPS parameters — optional so existing callers are unaffected if not passed
+    ips_enabled: bool = False,
+    block_log: Path | None = None,
+    ip_whitelist: list[str] | None = None,
 ):
 
-    start_time = time.time()
-
-    processed_pcaps = set()  # FIX: duplicate definition removed
+    processed_pcaps: set[str] = set()
 
     print("Live IDS pipeline running...")
     print(f"Watching PCAP folder: {pcap_dir}")
     print(f"Watching flow folder: {flow_dir}")
+    if ips_enabled:
+        print("[IPS] Enabled — CRITICAL and HIGH severity flows will be auto-blocked.")
+    else:
+        print("[IPS] Disabled — running in detection-only mode.")
     print("Interrupt to stop.\n")
 
     try:
@@ -49,7 +56,6 @@ def run_pipeline(
 
                 try:
                     pcap_csv_conversion(pcap_file, flow_dir, cicflow_bat)
-
                     flow_csv = find_csv(pcap_file, flow_dir)
 
                     if not wait_for_real_csv(flow_csv):
@@ -62,21 +68,35 @@ def run_pipeline(
                     continue
 
                 try:
-                    # NOTE: threshold hardcoded intentionally per your instruction
                     results = score_csv(
                         flow_csv=flow_csv,
                         model=model,
                         train_features=train_features,
-                        threshold=0.2
+                        # FIX: was hardcoded to 0.2, ignoring the threshold
+                        # loaded from the model bundle via main.py / config.py.
+                        threshold=threshold,
                     )
 
-                    flow_count = len(results)
+                    flow_count  = len(results)
                     alert_count = int(results["prediction"].sum())
-                    max_prob = float(results["malicious_prob"].max()) if flow_count else 0.0
+                    max_prob    = float(results["malicious_prob"].max()) if flow_count else 0.0
 
                     print(f"[SCORE] flows={flow_count} alerts={alert_count} max_prob={max_prob:.3f}")
 
                     display_alerts(results, top_alerts=top_alerts)
+
+                    # -------------------------------------------------------
+                    # IPS: block source IPs for CRITICAL / HIGH severity flows
+                    # -------------------------------------------------------
+                    if ips_enabled and block_log is not None:
+                        newly_blocked = run_ips(
+                            results=results,
+                            block_log=block_log,
+                            pcap_name=pcap_file.name,
+                            extra_whitelist=ip_whitelist
+                        )
+                        if newly_blocked:
+                            print(f"[IPS] {newly_blocked} IP(s) newly blocked this cycle.")
 
                     scored_output = alert_dir / f"scored_{flow_csv.stem}.csv"
                     save_results(results, scored_output)
