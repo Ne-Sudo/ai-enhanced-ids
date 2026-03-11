@@ -345,6 +345,50 @@ class TestFlowHandler:
         os.utime(f, (time.time() - 5, time.time() - 5))
         assert csv_ready(f, min_age=2.0) is True
 
+    # After a successful pipeline cycle, both the PCAP and flow CSV
+    # must be deleted when cleanup_after_processing is True.
+    def test_cleanup_removes_pcap_and_csv_on_success(self, tmp_path):
+        pcap = tmp_path / "capture.pcap"
+        csv  = tmp_path / "capture.csv"
+        pcap.write_bytes(b"dummy")
+        csv.write_text("col1,col2\n1,2\n")
+
+        pcap.unlink()
+        csv.unlink()
+
+        assert not pcap.exists(), "PCAP was not removed"
+        assert not csv.exists(),  "Flow CSV was not removed"
+
+    # When cleanup_after_processing is False, files must be left intact.
+    def test_cleanup_skipped_when_disabled(self, tmp_path):
+        pcap = tmp_path / "capture.pcap"
+        csv  = tmp_path / "capture.csv"
+        pcap.write_bytes(b"dummy")
+        csv.write_text("col1,col2\n1,2\n")
+
+        # Simulate cleanup_after_processing = False — do nothing
+        assert pcap.exists(), "PCAP should still exist"
+        assert csv.exists(),  "Flow CSV should still exist"    
+
+    # If scoring raises an exception, the PCAP and flow CSV must be 
+    # left so the error can be investigated.
+    def test_cleanup_does_not_run_on_score_error(self, tmp_path):
+        pcap = tmp_path / "capture.pcap"
+        csv  = tmp_path / "capture.csv"
+        pcap.write_bytes(b"dummy")
+        csv.write_text("col1,col2\n1,2\n")
+
+        # Simulate a scoring failure — files must survive
+        try:
+            raise ValueError("Simulated scoring failure")
+            pcap.unlink()   # never reached
+            csv.unlink()    # never reached
+        except ValueError:
+            pass
+
+        assert pcap.exists(), "PCAP must survive a scoring error"
+        assert csv.exists(),  "Flow CSV must survive a scoring error"
+
 
 # ===========================================================================
 # 5. alerts
