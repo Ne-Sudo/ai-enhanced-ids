@@ -10,6 +10,7 @@ from .config import (
     poll_time,
     min_pcap_age,
     top_alerts,
+    cleanup_after_processing,
     # IPS
     ips_enabled,
     block_log,
@@ -51,6 +52,7 @@ def main():
             poll_time=poll_time,
             min_pcap_age=min_pcap_age,
             top_alerts=top_alerts,
+            cleanup_after_processing=cleanup_after_processing,
             # IPS
             ips_enabled=ips_enabled,
             block_log=block_log,

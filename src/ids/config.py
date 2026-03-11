@@ -25,6 +25,9 @@ poll_time    = 1.0   # loop interval
 min_pcap_age = 5.0   # minimum file age before preprocessing
 top_alerts   = 5
 
+# Set to false to keep raw PCAPs and flow csvs after processing
+cleanup_after_processing = True 
+
 # ---------------------------------------------------------------------------
 # IPS settings
 # ---------------------------------------------------------------------------

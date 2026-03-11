@@ -19,6 +19,7 @@ def run_pipeline(
     poll_time: float,
     min_pcap_age: float,
     top_alerts: int,
+    cleanup_after_processing: bool,
     # IPS parameters — optional so existing callers are unaffected if not passed
     ips_enabled: bool = False,
     block_log: Path | None = None,
@@ -105,6 +106,16 @@ def run_pipeline(
                     get_alert_log(alert_log, summary)
 
                     processed_pcaps.add(pcap_file.name)
+
+                    # Clean up raw files now that results are saved to alert_dir.
+                    # Only runs on success — errors leave files intact for debugging.
+                    if cleanup_after_processing:
+                        try:
+                            pcap_file.unlink()
+                            flow_csv.unlink()
+                            print(f"[CLEANUP] Removed {pcap_file.name} and {flow_csv.name}")
+                        except OSError as e:
+                            print(f"[CLEANUP WARNING] Could not remove file: {e}")
 
                 except PermissionError as e:
                     print(f"[SCORE ERROR] {e}")
