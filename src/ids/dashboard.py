@@ -254,4 +254,27 @@ else:
     st.info("Alert log empty")
 
 time.sleep(5)
+
+# ===============================
+# IPS BLOCK LOG
+# ===============================
+
+st.subheader("IPS Block Log")
+
+from src.ids.config import block_log
+
+if block_log.exists():
+
+    block_df = pd.read_csv(block_log)
+
+    blocked_count = len(block_df)
+    st.metric("Total IPs Auto-Blocked", blocked_count)
+
+    st.dataframe(block_df.sort_values("time", ascending=False))
+
+else:
+    st.info("No IPs have been auto-blocked yet")
+
+st.markdown("---")
+
 st.rerun()
