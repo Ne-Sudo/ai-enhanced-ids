@@ -197,7 +197,7 @@ class TestIPSPrivateDetection:
 
 class TestIPSRuleNaming:
 
-    def test_rule_name_deterministic(self):
+    def test_rule_name(self):
         assert _rule_name("1.2.3.4") == "IDS_BLOCK_1.2.3.4"
 
     def test_rule_name_same_ip_always_same_name(self):
@@ -484,7 +484,7 @@ class TestMLMetrics:
         assert fpr <= 0.05
 
     def test_full_classification_report(self, results):
-        """Print the full report — copy this output into your dissertation."""
+        """Print the full report"""
         from sklearn.metrics import classification_report, confusion_matrix
         print("\n" + classification_report(
             results["y_true"], results["preds"],
@@ -492,6 +492,22 @@ class TestMLMetrics:
         ))
         print("Confusion matrix:")
         print(confusion_matrix(results["y_true"], results["preds"]))
+
+    def test_plot_confusion_matrix(self, results):
+        from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+        import matplotlib.pyplot as plt
+
+        cm = confusion_matrix(results["y_true"], results["preds"])
+        disp = ConfusionMatrixDisplay(
+        confusion_matrix=cm,
+        display_labels=["Benign", "Malicious"]
+        )
+
+        disp.plot(cmap="Blues")
+        plt.title("Confusion Matrix — Holdout Set")
+        plt.tight_layout()
+        plt.savefig("confusion_matrix.png", dpi=150, bbox_inches="tight")
+        plt.close()
 
 
 # ===========================================================================
@@ -511,3 +527,32 @@ class TestIPSLatency:
 
         print(f"\nrun_ips latency (500 flows): {elapsed:.4f}s")
         assert elapsed < 1.0, f"IPS loop took {elapsed:.2f}s — too slow for live use"
+
+# ===========================================================================
+# 8. Pipeline scoring latency
+# ===========================================================================
+class TestPipelineLatency:
+    # Measures end-to-end score_csv() latency on a realistic flow batch.
+    # Requires the model bundle and a test CSV to be present.
+
+    MODEL_PATH = Path("models/IDS_RF_v1.0")
+    TEST_CSV   = Path("data/test_set.csv")
+    THRESHOLD  = 0.20
+
+    def test_scoring_latency_under_10s(self, tmp_path):
+        if not self.MODEL_PATH.exists():
+            pytest.skip("Model bundle not found")
+        if not self.TEST_CSV.exists():
+            pytest.skip("Test CSV not found")
+
+        import joblib
+        bundle         = joblib.load(self.MODEL_PATH)
+        model          = bundle["model"]
+        train_features = bundle["features"]
+
+        start   = time.perf_counter()
+        results = score_csv(self.TEST_CSV, model, train_features, self.THRESHOLD)
+        elapsed = time.perf_counter() - start
+
+        print(f"\nscore_csv latency ({len(results)} flows): {elapsed:.4f}s")
+        assert elapsed < 10.0, f"Scoring took {elapsed:.2f}s — exceeds 10s target"

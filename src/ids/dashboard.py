@@ -253,8 +253,6 @@ if alert_log.exists():
 else:
     st.info("Alert log empty")
 
-time.sleep(5)
-
 # ===============================
 # IPS BLOCK LOG
 # ===============================
@@ -277,4 +275,5 @@ else:
 
 st.markdown("---")
 
+time.sleep(5)
 st.rerun()
